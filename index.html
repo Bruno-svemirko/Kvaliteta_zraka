@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Kvaliteta zraka</title>
+  <meta name="viewport"
+    content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <style>
+    .line-chart {
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script type="module"
+    src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"></script>
+  <script nomodule
+    src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.js"></script>
+
+  <link rel="icon" type="image/x-icon" href="./assets/icon/favicon.ico" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <meta name="theme-color" content="#31d53d" />
+  <meta charset="utf-8" />
+</head>
+
+<body>
+
+  <h1 class="m-4 font-bold text-4xl text-center">Kvaliteta zraka</h1>
+  <div class="mt-auto mb-auto flex flex-row justify-center">
+    <button id="saznaj" class="text-center w-full mb-5">Koja mi je najbliža postaja?</button>
+  </div>
+
+  <div id="resultModal" class="modal hidden bg-white shadow-md rounded-lg p-0 mb-5 border-2 border-blue-600">
+    <div class="modal-content">
+      <div class="p-3"><span id="closeModal"
+          class="close cursor-pointer pt-1 pb-1 pr-2 pl-2 bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-200">&times;</span>
+      </div>
+      <p id="resultMessage" class="text-center p-3">Najbliža postaja će biti prikazana ovdje.</p>
+      <div class="flex justify-center">
+        <button id="selectStation"
+          class="text-center 2xl:w-1/6 xl:w-1/6 lg:w-1/6 w-2/4 mt-2,5 mb-5 ml-auto mr-auto">Odaberi ovu postaju</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="formular">
+    <div class="formular_input">
+      <label for="postaja">Postaja:</label>
+      <select id="postaja" name="postaja">
+        <option value="14">Zajci</option>
+        <option value="20">Čambarelići</option>
+        <option value="37">Zoljan</option>
+        <option value="38">Vrhovec</option>
+        <option value="39">Pula Fižela</option>
+        <option value="40">Koromačno</option>
+        <option value="41">Ksaverska cesta</option>
+        <option value="46">Gripe</option>
+        <option value="47">Visoka</option>
+        <option value="48">Poljud</option>
+        <option value="49">Žrnovnica</option>
+        <option value="101">Đorđićeva ulica (Stanica za hitnu pomoć)</option>
+        <option value="102">Pešćenica</option>
+        <option value="103">Prilaz baruna Filipovića</option>
+        <option value="118">Susedgrad (Tvornica "Utenzilija")</option>
+        <option value="119">Siget (Dom zdravlja)</option>
+        <option value="121">Velika Gorica</option>
+        <option value="133">Sisak 3</option>
+        <option value="137">Banija 18</option>
+        <option value="140">Domobranska ulica 2</option>
+        <option value="141">Dr.V.Mačeka 48</option>
+        <option value="151">Sisak 2 Galdovo</option>
+        <option value="152">Riva 4</option>
+        <option value="153">Ulica Kamenjak (Dječji vrtić)</option>
+        <option value="155">ZAGREB-1</option>
+        <option value="156">ZAGREB-2</option>
+        <option value="157">ZAGREB-3</option>
+        <option value="158">RIJEKA-1</option>
+        <option value="159">RIJEKA-2</option>
+        <option value="160">OSIJEK-1</option>
+        <option value="161">KUTINA-1</option>
+        <option value="162">SISAK-1</option>
+        <option value="165">SLAVONSKI BROD-1</option>
+        <option value="168">Split-1</option>
+        <option value="173">AMS1 Kaštel Sućurac</option>
+        <option value="179">AMS2 Sveti Kajo</option>
+        <option value="180">Ripenda</option>
+        <option value="189">Sv. Katarina</option>
+        <option value="190">Plomin</option>
+        <option value="191">Klavar</option>
+        <option value="215">Kostrena - Martinšćica</option>
+        <option value="221">Urinj</option>
+        <option value="224">Paveki</option>
+        <option value="232">Viškovo - Marišćina</option>
+        <option value="235">Viškovo - Viševac</option>
+        <option value="241">Opatija - Gorovo</option>
+        <option value="243">Krasica</option>
+        <option value="245">Krešimirova ul.</option>
+        <option value="246">Vrh Martinšćice</option>
+        <option value="254">SLAVONSKI BROD - privremena pokretna postaja</option>
+        <option value="255">KOPAČKI RIT</option>
+        <option value="256">DESINIĆ</option>
+        <option value="257">PLITVIČKA JEZERA</option>
+        <option value="258">PARG</option>
+        <option value="259">VIŠNJAN</option>
+        <option value="260">VELA STRAŽA (Dugi otok)</option>
+        <option value="261">POLAČA (Ravni kotari)</option>
+        <option value="262">HUM (otok Vis)</option>
+        <option value="263">OPUZEN (Delta Neretve)</option>
+        <option value="264">ŽARKOVICA (Dubrovnik)</option>
+        <option value="265">Bijenik</option>
+        <option value="267">ZAGREB PPI PM2,5 - Ksaverska cesta</option>
+        <option value="273">Vatrogasni dom (K2) - Kutina</option>
+        <option value="274">Jakuševec</option>
+        <option value="275">SLAVONSKI BROD-2</option>
+        <option value="276">Mlaka</option>
+        <option value="277">VARAŽDIN-1</option>
+        <option value="278">KARLOVAC-1</option>
+        <option value="280">Mirogojska cesta</option>
+      </select>
+    </div>
+    <div class="formular_input">
+      <div>
+        <label for="polutant">Polutant:</label>
+      </div>
+      <div>
+        <select id="polutant" name="polutant">
+          <option value="1">NO₂ - dušikov dioksid (µg/m3)</option>
+          <option value="2">SO₂ - sumporov dioksid (µg/m3)</option>
+          <option value="3">CO - ugljikov monoksid (mg/m3)</option>
+          <option value="4">H₂S - sumporovodik (µg/m3)</option>
+          <option value="5">PM₁₀ - lebdeće čestice (&lt;10µm) (µg/m3)</option>
+          <option value="28">PM₂.₅ - lebdeće čestice (&lt;2.5µm) (µg/m3)</option>
+          <option value="29">lebdeće čestice (ukupne) (µg/m3)</option>
+          <option value="30">Pb u PM₁₀ - olovo u PM10 (µg/m3)</option>
+          <option value="31">O₃ - ozon (µg/m3)</option>
+          <option value="32">benzen (µg/m3)</option>
+          <option value="33">Cd u PM₁₀ - kadmij u PM10 (ng/m3)</option>
+          <option value="34">As u PM₁₀ - arsen u PM10 (ng/m3)</option>
+          <option value="35">Ni u PM₁₀ - nikal u PM10 (ng/m3)</option>
+          <option value="37">dim (µg/m3)</option>
+          <option value="38">NOₓ izraženi kao NO₂ - dušikovi oksidi (µg/m3)</option>
+          <option value="39">etan (µg/m3)</option>
+          <option value="40">eten (etilen) (µg/m3)</option>
+          <option value="41">etin (acetilen) (µg/m3)</option>
+          <option value="42">propan (µg/m3)</option>
+          <option value="43">propen (µg/m3)</option>
+          <option value="44">n-butan (µg/m3)</option>
+          <option value="45">izo-butan (µg/m3)</option>
+          <option value="46">l-buten (µg/m3)</option>
+          <option value="47">trans-2-buten (µg/m3)</option>
+          <option value="48">cis-2-buten (µg/m3)</option>
+          <option value="49">butadien 1,3 (µg/m3)</option>
+          <option value="50">n-pentan (µg/m3)</option>
+          <option value="51">izo-pentan (µg/m3)</option>
+          <option value="52">1-penten (µg/m3)</option>
+          <option value="53">2-penten (µg/m3)</option>
+          <option value="54">izopren (µg/m3)</option>
+          <option value="55">n-heksan (µg/m3)</option>
+          <option value="56">i-heksan (µg/m3)</option>
+          <option value="57">n-heptan (µg/m3)</option>
+          <option value="58">n-oktan (µg/m3)</option>
+          <option value="59">izo-oktan (µg/m3)</option>
+          <option value="60">toluen (µg/m3)</option>
+          <option value="61">etil benzen (µg/m3)</option>
+          <option value="62">m,p-ksilen (µg/m3)</option>
+          <option value="63">o-ksilen (µg/m3)</option>
+          <option value="64">1,2,4 trimetilbenzen (µg/m3)</option>
+          <option value="65">1,2,3-trimetil benzen (µg/m3)</option>
+          <option value="66">1,3,5-trimetil benzen (µg/m3)</option>
+          <option value="67">formaldehid (µg/m3)</option>
+          <option value="68">ukupnine-metanski ugljikovodici izraženi kao ukupni C (µg/m3)</option>
+          <option value="69">jaka kiselost alternativa SO2 (µg/m3)</option>
+          <option value="70">lebdeće čestice (&lt;1µm) (µg/m3)</option>
+          <option value="71">metan (µg/m3)</option>
+          <option value="72">krom (ng/m3)</option>
+          <option value="73">mangan (ng/m3)</option>
+          <option value="74">ugljik disulfid (µg/m3)</option>
+          <option value="75">stiren (µg/m3)</option>
+          <option value="76">akrilonitril (µg/m3)</option>
+          <option value="77">trikloretilen (µg/m3)</option>
+          <option value="78">tetrakloretilen (µg/m3)</option>
+          <option value="79">dikloromethan (µg/m3)</option>
+          <option value="80">BaP u PM₁₀ - Benzo(a)piren u PM10 (ng/m3)</option>
+          <option value="81">vinil klorid (µg/m3)</option>
+          <option value="82">peroksiacetil nitrat (µg/m3)</option>
+          <option value="84">vlažno taloženje dušika izraženo kao N (mg/(m2 mjesec))</option>
+          <option value="85">vlažno taloženje sumpora izraženo kao S (mg/(m2 mjesec))</option>
+          <option value="87">ugljik-dioksid (µg/m3)</option>
+          <option value="88">btx (µg/m3)</option>
+          <option value="90">ukupna taložna tvar (Mg/m2d)</option>
+          <option value="95">NH₃ - amonijak (µg/m3)</option>
+          <option value="96">Lead in PM2.5 (aerosol) (µg/m3)</option>
+          <option value="97">Mercury in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="98">Cadmium in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="99">Nickel in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="100">Cr u PM₂.₅ - krom u PM2.5 (ng/m3)</option>
+          <option value="101">Mn u PM₂.₅ - mangan u PM2.5 (ng/m3)</option>
+          <option value="102">Arsenic in PM2.5 (aerosol) (µg/m3)</option>
+          <option value="103">Benzo(a)pyrene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="104">Amonij u PM₂.₅ (µg/m3)</option>
+          <option value="105">Nitrati u PM2.5 (µg/m3)</option>
+          <option value="106">Sulfati u PM2.5 (µg/m3)</option>
+          <option value="107">Selenium in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="108">V u PM₂.₅ - vanadij u PM2.5 (ng/m3)</option>
+          <option value="109">Zn u PM₂.₅ - cink u PM2.5 (ng/m3)</option>
+          <option value="110">Co u PM₂.₅ - kobalt u PM2.5 (ng/m3)</option>
+          <option value="111">Iron in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="112">Cu u PM₂.₅ - bakar u PM2.5 (ng/m3)</option>
+          <option value="113">Benzo(a)pyrene in PM2.5 (air+aerosol) (ng/m3)</option>
+          <option value="114">Pb - Lead (aerosol) (µg/m3)</option>
+          <option value="115">Mercury (aerosol) (ng/m3)</option>
+          <option value="116">Dibenzo(ah)anthracene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="117">Benzo(a)anthracene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="118">Fluoranthene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="119">Benzo(b+j+k)fluoranthene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="120">Chrysene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="121">Benzo(ghi)perylene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="122">Ideno(123cd)pyrene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="123">Naphthalene in PM2.5 (aerosol) (ng/m3)</option>
+          <option value="124">Manganese (aerosol) (ng/m3)</option>
+          <option value="125">Cadmium (aerosol) (ng/m3)</option>
+          <option value="126">Nickel (aerosol) (ng/m3)</option>
+          <option value="127">Chromium (aerosol) (ng/m3)</option>
+          <option value="128">Cobalt (aerosol) (ng/m3)</option>
+          <option value="129">Zinc (aerosol) (ng/m3)</option>
+          <option value="130">Vanadium (aerosol) (ng/m3)</option>
+          <option value="131">NOₓ - dušikovi oksidi (izračunati iz NOₓ i NO₂) (µg/m3)</option>
+          <option value="132">NH₃ u PM2.5 (µg/m3)</option>
+          <option value="133">NH₄ - amonijev ion u PM2.5 (precip)</option>
+          <option value="134">NO₃ - nitratni ion u PM2.5 (precip)</option>
+          <option value="135">SO₄ - sulfatni ion u PM2.5 (precip)</option>
+          <option value="136">Zinc (precip)</option>
+          <option value="137">Cobalt (precip)</option>
+          <option value="138">Iron (precip)</option>
+          <option value="139">Copper (precip)</option>
+          <option value="140">acidity(pH) (precip)</option>
+          <option value="141">Benzo(b,j,k)fluoranthene (precip)</option>
+          <option value="144">phosphate (precip)</option>
+          <option value="145">Polyaromatic hydrocarbons (air+aerosol) (ng/m3)</option>
+          <option value="146">Lead in TSP (aerosol) (µg/m3)</option>
+          <option value="147">Mercury in TSP (aerosol) (ng/m3)</option>
+          <option value="148">Cadmium in TSP (aerosol) (ng/m3)</option>
+          <option value="149">Nickel in TSP (aerosol) (ng/m3)</option>
+          <option value="150">Chromium in TSP (aerosol) (ng/m3)</option>
+          <option value="151">Manganese in TSP (aerosol) (ng/m3)</option>
+          <option value="152">Arsenic in TSP (aerosol) (ng/m3)</option>
+          <option value="153">CFC_11 (air)</option>
+          <option value="154">CFC_113 (air)</option>
+          <option value="155">CFC_12 (air)</option>
+          <option value="156">Zinc in TSP (aerosol) (ng/m3)</option>
+          <option value="157">HCFC_123 (air)</option>
+          <option value="158">Copper in TSP (aerosol) (ng/m3)</option>
+          <option value="159">HCFC_22 (air)</option>
+          <option value="160">N1methylnaphtalene (air+aerosol) (ng/m3)</option>
+          <option value="161">N1methylphenanthrene (air+aerosol) (ng/m3)</option>
+          <option value="162">N2butanone (air) (µg/m3)</option>
+          <option value="163">N2butenal (air) (µg/m3)</option>
+          <option value="164">N2methylanthracene (air+aerosol) (ng/m3)</option>
+          <option value="165">N2methylbenzencarbaldehyde (air) (µg/m3)</option>
+          <option value="166">N2methylnaphtalene (air+aerosol) (ng/m3)</option>
+          <option value="167">N2methylphenanthrene (air+aerosol) (ng/m3)</option>
+          <option value="168">N2methylpropenal (air) (µg/m3)</option>
+          <option value="169">N2oxopropanal (air) (µg/m3)</option>
+          <option value="170">N2propenal (air) (µg/m3)</option>
+          <option value="171">N3buten2one (air) (µg/m3)</option>
+          <option value="172">N3methylbenzencarbaldehyde (air) (µg/m3)</option>
+          <option value="173">N3methylpentane (air)</option>
+          <option value="174">N4methylbenzencarbaldehyde (air) (µg/m3)</option>
+          <option value="175">NOy (air)</option>
+          <option value="176">Total volatile organic compounds (air) (µg/m3)</option>
+          <option value="177">PCB_105 (precip)</option>
+          <option value="178">PCB_128 (precip)</option>
+          <option value="179">PCB_149 (precip)</option>
+          <option value="180">PCB_156 (precip)</option>
+          <option value="181">PCB_177 (precip)</option>
+          <option value="182">PCB_18 (precip)</option>
+          <option value="183">PCB_26 (precip)</option>
+          <option value="184">PCB_31 (precip)</option>
+          <option value="185">PCB_44 (precip)</option>
+          <option value="186">acenaphthene (air+aerosol) (ng/m3)</option>
+          <option value="187">acenaphtylene (air+aerosol) (ng/m3)</option>
+          <option value="188">aldrin (precip)</option>
+          <option value="190">chloride in TSP (aerosol) (µg/m3)</option>
+          <option value="191">anthanthrene (air+aerosol) (ng/m3)</option>
+          <option value="192">sodium in TSP (aerosol) (µg/m3)</option>
+          <option value="194">Benzenecarbaldehyde (air) (µg/m3)</option>
+          <option value="195">Benzo(a)fluoranthene (air+aerosol) (ng/m3)</option>
+          <option value="196">Nitrogen monoxide (air) (µg/m3)</option>
+          <option value="197">Benzo(b+j+k)fluoranthenes (air+aerosol) (ng/m3)</option>
+          <option value="198">Benzo(e)pyrene (air+aerosol) (ng/m3)</option>
+          <option value="199">Hydrogen chloride (air) (µg/m3)</option>
+          <option value="200">biphenyl (air+aerosol) (ng/m3)</option>
+          <option value="201">black_carbon (aerosol) (µg/m3)</option>
+          <option value="202">butanales (air) (µg/m3)</option>
+          <option value="203">butenes (air)</option>
+          <option value="205">Hydrogen fluoride (air) (µg/m3)</option>
+          <option value="206">carbontetrachloride (air)</option>
+          <option value="207">Hg0 - Elemental Gaseous Mercury (air+aerosol) (ng/m3)</option>
+          <option value="208">chrysene (precip)</option>
+          <option value="209">conductivity (precip)</option>
+          <option value="210">coronene (air+aerosol) (ng/m3)</option>
+          <option value="211">cyclohexane (air)</option>
+          <option value="212">Cyklopenta(cd)pyrene (air+aerosol) (ng/m3)</option>
+          <option value="213">Dibenzo(ac+ah)anthracenes (precip) (ng/m3)</option>
+          <option value="214">Dibenzo(ah)anthracene (precip)</option>
+          <option value="215">dibenzofuran (air+aerosol) (ng/m3)</option>
+          <option value="216">dibenzothiophene (air+aerosol) (ng/m3)</option>
+          <option value="217">dinitrogenoxide (air)</option>
+          <option value="218">endrin (precip)</option>
+          <option value="219">ethanal (air) (µg/m3)</option>
+          <option value="220">ethanedial (air) (µg/m3)</option>
+          <option value="222">PCB_105 (air+aerosol) (pg/m3)</option>
+          <option value="223">PCB_149 (air+aerosol) (pg/m3)</option>
+          <option value="224">PCB_156 (air+aerosol) (pg/m3)</option>
+          <option value="225">PCB_18 (air+aerosol) (pg/m3)</option>
+          <option value="226">PCB_31 (air+aerosol) (pg/m3)</option>
+          <option value="227">fluorene (air+aerosol) (ng/m3)</option>
+          <option value="228">halon_1211 (air)</option>
+          <option value="229">halon_1301 (air)</option>
+          <option value="230">heptachlor (precip)</option>
+          <option value="231">chrysene (air+aerosol) (ng/m3)</option>
+          <option value="232">chrysene_triphenylene (air+aerosol) (ng/m3)</option>
+          <option value="233">hexanal (air) (µg/m3)</option>
+          <option value="234">isoheptane (air) (µg/m3)</option>
+          <option value="235">Particulate ammonium (aerosol) (µg/m3)</option>
+          <option value="236">Isoprene (2-methyl-1,3-butadiene) (air) (µg/m3)</option>
+          <option value="237">Particulate nitrate (aerosol) (µg/m3)</option>
+          <option value="238">methylchloroform (air)</option>
+          <option value="239">naphtalene (air+aerosol) (ng/m3)</option>
+          <option value="240">neohexane (air)</option>
+          <option value="241">neopentane (air)</option>
+          <option value="242">Particulate sulphate (aerosol) (µg/m3)</option>
+          <option value="243">Selenium (aerosol) (ng/m3)</option>
+          <option value="244">Hg0 + Hg-reactive - ukupna plinovita živa (ng/m3)</option>
+          <option value="245">pentanal (air) (µg/m3)</option>
+          <option value="246">Perylene (air+aerosol) (ng/m3)</option>
+          <option value="247">Phenanthrene (air+aerosol) (ng/m3)</option>
+          <option value="248">Polychlorinated biphenyls (air) (pg/m3)</option>
+          <option value="249">pollutant_in_air (ng/m3)</option>
+          <option value="250">polycyclic aromatic hydrocarbons (air) (ng/m3)</option>
+          <option value="251">silicon in TSP (aerosol) (ng/m3)</option>
+          <option value="252">sodium in TSP (aerosol) (ng/m3)</option>
+          <option value="253">stibine (air) (µg/m3)</option>
+          <option value="254">styrene (air) (µg/m3)</option>
+          <option value="255">Sulfur dioxide (air) (µg/m3)</option>
+          <option value="256">Sulfidic anions in TSP (aerosol) (ng/m3)</option>
+          <option value="257">toluene (air) (µg/m3)</option>
+          <option value="258">trichloroethylene (air)</option>
+          <option value="259">xylene (air) (µg/m3)</option>
+          <option value="260">propanone (air) (µg/m3)</option>
+          <option value="261">Ammonium in PM10 (aerosol) (µg/m3)</option>
+          <option value="262">Nitrate in PM10 (aerosol) (µg/m3)</option>
+          <option value="263">sulphate in PM10 (aerosol) (µg/m3)</option>
+          <option value="264">Selenium in PM10 (aerosol) (ng/m3)</option>
+          <option value="265">Vanadium in PM10 (aerosol) (ng/m3)</option>
+          <option value="266">Zn u PM₁₀ - cink u PM10 (aerosol) (ng/m3)</option>
+          <option value="267">Cobalt in PM10 (aerosol) (ng/m3)</option>
+          <option value="268">Fe u PM₁₀ - željezo u PM10 (aerosol) (ng/m3)</option>
+          <option value="269">Cu u PM₁₀ - bakar u PM10 (aerosol) (ng/m3)</option>
+          <option value="270">retene (air+aerosol) (ng/m3)</option>
+          <option value="271">HC C2-C6(excl. AROM. & CHLH) (air+aerosol) (µg/m3)</option>
+          <option value="272">BaP u PM₁₀ - Benzo(a)piren u PM10 (air+aerosol) (ng/m3)</option>
+          <option value="273">sum_PCB (precip)</option>
+          <option value="274">HC > C6 (excl. AROM. & CHLH) (air+aerosol) (µg/m3)</option>
+          <option value="275">sum_sulph_diox_sulphate (air+aerosol)</option>
+          <option value="276">Aromatics (except C6H6) (air) (µg/m3)</option>
+          <option value="277">Benzo(b,j,k)fluoranthene in PM10 (aerosol) (ng/m3)</option>
+          <option value="278">Chlorinated hydrocarbons (air) (µg/m3)</option>
+          <option value="279">Dibenzo(a,h)antracen u PM10</option>
+          <option value="280">Dibenzo(a,h)antracen u PM10 (aerosol) (ng/m3)</option>
+          <option value="281">Benzo(b,j)fluoranthene in PM10 (aerosol) (ng/m3)</option>
+          <option value="282">Benzo(a)anthracene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="283">Benzo(a)antracen u PM10</option>
+          <option value="284">Benzo(b)fluoranthene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="285">Benzo(b)fluoranten u PM10</option>
+          <option value="286">Benzo(k)fluoranthene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="287">Benzo(k)fluoranten u PM10</option>
+          <option value="288">calcium in PM10 (aerosol) (µg/m3)</option>
+          <option value="289">chloride in PM10 (aerosol) (µg/m3)</option>
+          <option value="290">indeno_123cd_pyrene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="291">Indeno(1,2,3,-cd)piren u PM10</option>
+          <option value="292">potassium in PM10 (aerosol) (µg/m3)</option>
+          <option value="293">magnesium in PM10 (aerosol) (µg/m3)</option>
+          <option value="294">sodium in PM10 (aerosol) (µg/m3)</option>
+          <option value="295">Benzo(j)fluoranten u PM10</option>
+          <option value="296">Benzo(j)fluoranthene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="297">Dibenzo(ah)anthracene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="298">Elemental carbon in PM10 (aerosol) (µg/m3)</option>
+          <option value="299">Organic carbon in PM10 (aerosol) (µg/m3)</option>
+          <option value="300">Black smoke (air) (µg/m3)</option>
+          <option value="301">trans-2-Butene (air) (µg/m3)</option>
+          <option value="302">cis-2-Butene (air) (µg/m3)</option>
+          <option value="303">N3methylphenanthrene (air+aerosol) (ng/m3)</option>
+          <option value="307">BaP - Benzo(a)pyrene (air+aerosol) (ng/m3)</option>
+          <option value="308">N9methylphenanthrene (air+aerosol) (ng/m3)</option>
+          <option value="309">Al - aluminij (ng/m3)</option>
+          <option value="310">aluminium (precip)</option>
+          <option value="311">anthracene (air+aerosol) (ng/m3)</option>
+          <option value="312">anthracene (precip)</option>
+          <option value="313">anthracene (precip+dry_dep)</option>
+          <option value="314">Benzo(a)anthracene (air+aerosol) (ng/m3)</option>
+          <option value="315">Benzo(a)anthracene (precip)</option>
+          <option value="316">Benzo(a)anthracene (precip+dry_dep)</option>
+          <option value="317">Benzo(a)fluorene (air+aerosol) (ng/m3)</option>
+          <option value="318">Benzo(b)fluoranthene (air+aerosol) (ng/m3)</option>
+          <option value="319">Benzo(b)fluoranthene (precip)</option>
+          <option value="320">Benzo(b)fluoranthene (precip+dry_dep)</option>
+          <option value="321">Benzo(b)fluorene (air+aerosol) (ng/m3)</option>
+          <option value="322">Fluoride (except HF) (air) (µg/m3)</option>
+          <option value="323">Benzo(ghi)fluoranthene (air+aerosol) (ng/m3)</option>
+          <option value="324">Benzo(ghi)fluoranthene (precip)</option>
+          <option value="325">Benzo(ghi)perilen u PM10 (ng/m3)</option>
+          <option value="326">Benzo(ghi)perylene (precip)</option>
+          <option value="327">Benzo(ghi)perylene (precip+dry_dep)</option>
+          <option value="328">Benzo(k)fluoranthene (air+aerosol) (ng/m3)</option>
+          <option value="329">Benzo(k)fluoranthene (precip)</option>
+          <option value="330">Benzo(k)fluoranthene (precip+dry_dep)</option>
+          <option value="331">calcium (aerosol) (µg/m3)</option>
+          <option value="332">Zinc (aerosol) (ng/m3)</option>
+          <option value="333">calcium (precip)</option>
+          <option value="334">chloride (aerosol) (µg/m3)</option>
+          <option value="335">chloride (precip)</option>
+          <option value="336">Dibenz(ac+ah)anthracenes (air+aerosol) (ng/m3)</option>
+          <option value="337">Dibenz(ac+ah)anthracenes (precip)</option>
+          <option value="338">Dibenz(ah)anthracene (precip)</option>
+          <option value="339">Dibenzo(ae)pyrene (air+aerosol) (ng/m3)</option>
+          <option value="340">Dibenzo(ah)pyrene (air+aerosol) (ng/m3)</option>
+          <option value="341">Dibenzo(ai)pyrene (air+aerosol) (ng/m3)</option>
+          <option value="342">Benzo(b,j,k)fluoranthene in PM10 (air+aerosol) (ng/m3)</option>
+          <option value="343">Dibenzo(ai)pyrene (precip)</option>
+          <option value="344">Cobalt (aerosol) (ng/m3)</option>
+          <option value="345">dieldrin (air+aerosol) (pg/m3)</option>
+          <option value="346">dieldrin (precip)</option>
+          <option value="347">fluoranthene (air+aerosol) (ng/m3)</option>
+          <option value="348">fluoranthene (precip)</option>
+          <option value="349">fluoranthene (precip+dry_dep)</option>
+          <option value="350">acidity(H+) (precip)</option>
+          <option value="351">HCB (air+aerosol) (pg/m3)</option>
+          <option value="352">Iron (aerosol) (ng/m3)</option>
+          <option value="353">HCB (precip)</option>
+          <option value="354">heptachlor_epoxide (precip)</option>
+          <option value="355">reactive_mercury (air+aerosol) (ng/m3)</option>
+          <option value="356">indeno_123cd_pyrene (air+aerosol) (ng/m3)</option>
+          <option value="357">indeno_123cd_pyrene (precip)</option>
+          <option value="358">indeno_123cd_pyrene (precip+dry_dep)</option>
+          <option value="359">potassium (aerosol) (µg/m3)</option>
+          <option value="360">potassium (precip)</option>
+          <option value="361">magnesium (aerosol) (µg/m3)</option>
+          <option value="362">Back scattering ()</option>
+          <option value="363">magnesium (precip)</option>
+          <option value="364">molybdenum (aerosol) (ng/m3)</option>
+          <option value="365">ammonium (precip)</option>
+          <option value="366">nitrate (precip)</option>
+          <option value="367">sodium (aerosol) (µg/m3)</option>
+          <option value="368">sodium (precip)</option>
+          <option value="369">Total nitrate (air+aerosol)</option>
+          <option value="370">PCB_101 (air+aerosol) (pg/m3)</option>
+          <option value="371">PCB_101 (precip)</option>
+          <option value="372">PCB_101 (precip+dry_dep)</option>
+          <option value="373">PCB_114 (air+aerosol) (pg/m3)</option>
+          <option value="374">PCB_118 (air+aerosol) (pg/m3)</option>
+          <option value="375">PCB_118 (precip)</option>
+          <option value="376">PCB_118 (precip+dry_dep)</option>
+          <option value="377">PCB_138 (air+aerosol) (pg/m3)</option>
+          <option value="378">PCB_138 (precip+dry_dep)</option>
+          <option value="379">PCB_141 (air+aerosol) (pg/m3)</option>
+          <option value="380">Total ammonium (air+aerosol)</option>
+          <option value="381">PCB_153 (air+aerosol) (pg/m3)</option>
+          <option value="382">PCB_153 (precip)</option>
+          <option value="383">PCB_153 (precip+dry_dep)</option>
+          <option value="384">PCB_157 (air+aerosol) (pg/m3)</option>
+          <option value="385">PCB_167 (air+aerosol) (pg/m3)</option>
+          <option value="386">PCB_170 (air+aerosol) (pg/m3)</option>
+          <option value="387">PCB_180 (air+aerosol) (pg/m3)</option>
+          <option value="388">PCB_180 (precip)</option>
+          <option value="389">PCB_180 (precip+dry_dep)</option>
+          <option value="390">PCB_183 (air+aerosol) (pg/m3)</option>
+          <option value="391">Radioactivity ()</option>
+          <option value="392">PCB_187 (air+aerosol) (pg/m3)</option>
+          <option value="393">PCB_189 (air+aerosol) (pg/m3)</option>
+          <option value="394">PCB_194 (air+aerosol) (pg/m3)</option>
+          <option value="395">PCB_206 (air+aerosol) (pg/m3)</option>
+          <option value="396">PCB_209 (air+aerosol) (pg/m3)</option>
+          <option value="397">PCB_28 (air+aerosol) (pg/m3)</option>
+          <option value="398">PCB_28 (precip)</option>
+          <option value="399">PCB_28 (precip+dry_dep)</option>
+          <option value="400">PCB_33 (air+aerosol) (pg/m3)</option>
+          <option value="401">PCB_37 (air+aerosol) (pg/m3)</option>
+          <option value="402">PCB_47 (air+aerosol) (pg/m3)</option>
+          <option value="403">PCB_52 (air+aerosol) (pg/m3)</option>
+          <option value="404">Lead (precip+dry_dep)</option>
+          <option value="405">Mercury (precip+dry_dep)</option>
+          <option value="406">Cadmium (precip+dry_dep)</option>
+          <option value="407">Nickel (precip+dry_dep)</option>
+          <option value="408">PCB_52 (precip)</option>
+          <option value="409">Benzo(a)pyrene (precip+dry_dep)</option>
+          <option value="410">PCB_52 (precip+dry_dep)</option>
+          <option value="411">PCB_60 (air+aerosol) (pg/m3)</option>
+          <option value="412">PCB_66 (air+aerosol) (pg/m3)</option>
+          <option value="413">PCB_74 (air+aerosol) (pg/m3)</option>
+          <option value="414">PCB_99 (air+aerosol) (pg/m3)</option>
+          <option value="415">PCB_122 (air+aerosol) (pg/m3)</option>
+          <option value="416">PCB_123 (air+aerosol) (pg/m3)</option>
+          <option value="417">PCB_128 (air+aerosol) (pg/m3)</option>
+          <option value="418">PCB_138 (precip)</option>
+          <option value="419">phenanthrene (air+aerosol) (ng/m3)</option>
+          <option value="420">phenanthrene (precip)</option>
+          <option value="421">phenanthrene (precip+dry_dep)</option>
+          <option value="422">pyrene (air+aerosol) (ng/m3)</option>
+          <option value="423">pyrene (precip)</option>
+          <option value="424">pyrene (precip+dry_dep)</option>
+          <option value="425">sulphate (precip)</option>
+          <option value="426">sulphate_corrected (precip)</option>
+          <option value="427">titanium (precip)</option>
+          <option value="428">vanadium (precip)</option>
+          <option value="429">alpha_HCH (air+aerosol) (pg/m3)</option>
+          <option value="430">Copper (aerosol) (ng/m3)</option>
+          <option value="431">alpha_HCH (precip)</option>
+          <option value="432">alpha_HCH (precip+dry_dep)</option>
+          <option value="433">beta_HCH (air+aerosol) (pg/m3)</option>
+          <option value="434">beta_HCH (precip)</option>
+          <option value="435">cis_CD (air+aerosol) (pg/m3)</option>
+          <option value="436">cis_CD (precip)</option>
+          <option value="437">cis_NO (air+aerosol) (pg/m3)</option>
+          <option value="438">lindane (air+aerosol) (pg/m3)</option>
+          <option value="439">lindane (precip+dry_dep)</option>
+          <option value="440">Benzo(b,j,k)fluoranthene (precip+dry_dep)</option>
+          <option value="441">lindane (precip)</option>
+          <option value="442">chrysene_triphenylene (precip+dry_dep)</option>
+          <option value="443">op_DDD (precip)</option>
+          <option value="444">Dibenzo(ah)anthracene (precip+dry_dep)</option>
+          <option value="445">op_DDE (precip)</option>
+          <option value="446">op_DDT (precip)</option>
+          <option value="447">op_DDD (air+aerosol) (pg/m3)</option>
+          <option value="448">op_DDE (air+aerosol) (pg/m3)</option>
+          <option value="449">op_DDT (air+aerosol) (pg/m3)</option>
+          <option value="450">pp_DDD (precip)</option>
+          <option value="451">pp_DDE (precip)</option>
+          <option value="452">pp_DDT (precip)</option>
+          <option value="453">pp_DDD (air+aerosol) (pg/m3)</option>
+          <option value="454">pp_DDE (air+aerosol) (pg/m3)</option>
+          <option value="455">pp_DDT (air+aerosol) (pg/m3)</option>
+          <option value="456">precipitation_amount (precip)</option>
+          <option value="457">precipitation_amount_off (precip)</option>
+          <option value="458">trans_CD (air+aerosol) (pg/m3)</option>
+          <option value="459">trans_CD (precip)</option>
+          <option value="460">trans_NO (air+aerosol) (pg/m3)</option>
+          <option value="461">trans_NO (precip)</option>
+          <option value="462">Benzo(j)fluoranthene (precip)</option>
+          <option value="463">Benzo(j)fluoranthene (precip+dry_dep)</option>
+          <option value="464">Benzo(j)fluorene (air+aerosol) (ng/m3)</option>
+          <option value="465">Benzo(j)fluoranthene (air+aerosol) (ng/m3)</option>
+          <option value="466">Dibenzo(ah)anthracene (air+aerosol) (ng/m3)</option>
+          <option value="467">Elemental carbon (aerosol) (µg/m3)</option>
+          <option value="468">Organic carbon (aerosol) (µg/m3)</option>
+          <option value="469">Xylene (air) (µg/m3)</option>
+          <option value="470">p-Xylene (air) (µg/m3)</option>
+          <option value="471">m-Xylene (air) (µg/m3)</option>
+          <option value="472">trans-2-Pentene (air) (µg/m3)</option>
+          <option value="473">cis-2-Pentene (air) (µg/m3)</option>
+          <option value="474">Merkaptani (µg/m3)</option>
+          <option value="475">temperatura (℃)</option>
+          <option value="476">UV-B</option>
+          <option value="477">brzina vjetra (m/s)</option>
+          <option value="478">smjer vjetra (°)</option>
+          <option value="479">relativna vlažnost (%)</option>
+          <option value="484">Phosphorus in PM2.5 (aerosol) ng/m3</option>
+          <option value="486">Fluoranten u PM10</option>
+          <option value="487">Piren u PM10</option>
+          <option value="488">Mn u PM10 – mangan u PM10</option>
+          <option value="489">Cu u PM10 – bakar u PM10</option>
+          <option value="491">Zn u PM10 – cink u PM10</option>
+        </select>
+      </div>
+
+
+    </div>
+    <div class="formular_input">
+      <label for="datumOd">Od datuma:</label>
+      <input type="text" id="datumOd" name="datumOd">
+    </div>
+    <div class="formular_input">
+      <label for="datumDo">Do datuma:</label>
+      <input type="text" id="datumDo" name="datumDo">
+    </div>
+    <div class="mt-auto mb-auto flex flex-row justify-around">
+      <button id="filtriraj" class="text-center w-full 2xl:w-40">Filtriraj</button>
+    </div>
+
+  </div>
+
+  <div id="dataContainer" class="hidden">
+    <div class="table-container">
+      <h2 class="text-center">Tablica podataka</h2>
+      <div class="overflow-auto max-h-[400px]">
+        <table id="podaci" class="min-w-full border border-gray-300">
+          <thead class="table-header">
+            <tr>
+              <th class="text-center">Vrijeme</th>
+              <th class="text-center">Vrijednost</th>
+              <th class="text-center">Mjerna jedinica</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <div id="lineGraph"
+        class="mt-4 h-30 bg-gray-200 border border-gray-300 rounded-lg flex justify-center items-center mb-10 min-w-[1000px]">
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/geolokacija.js" type="module"></script>
+  <script>
+
+    $(document).ready(function () {
+
+      $('#datumOd').datepicker({
+        dateFormat: 'dd.mm.yy',
+        minDate: null,
+        maxDate: new Date()
+      });
+      $('#datumDo').datepicker({
+        dateFormat: 'dd.mm.yy',
+        minDate: null,
+        maxDate: new Date()
+      });
+
+
+      function fetchData() {
+        var postaja = $('#postaja').val();
+        var polutant = $('#polutant').val();
+        var tipPodatka = '0';
+        var datumOd = $('#datumOd').val();
+        var datumDo = $('#datumDo').val();
+
+
+        var url = `https://iszz.azo.hr/iskzl/rs/podatak/export/json?postaja=${postaja}&polutant=${polutant}&tipPodatka=${tipPodatka}&vrijemeOd=${datumOd}&vrijemeDo=${datumDo}`;
+
+
+        $('#podaci tbody').empty();
+        d3.select("#lineGraph").selectAll("*").remove();
+
+        $.ajax({
+          url: url,
+          dataType: 'json',
+          cache: false,
+          success: function (data) {
+            const lineData = [];
+
+            $.each(data, function (i, item) {
+              var row = '<tr>' +
+                '<td>' + formatDate(new Date(item.vrijeme)) + '</td>' +
+                '<td>' + item.vrijednost + '</td>' +
+                '<td>' + item.mjernaJedinica + '</td>' +
+
+                '</tr>';
+              $('#podaci tbody').append(row);
+
+
+              lineData.push({
+                value: parseFloat(item.vrijednost),
+                date: new Date(item.vrijeme)
+              });
+            });
+
+
+            if (lineData.length > 0) {
+              drawLineGraph(lineData);
+              $('#dataContainer').removeClass('hidden');
+            } else {
+              d3.select("#lineGraph").selectAll("*").remove();
+              $('#dataContainer').addClass('hidden');
+            }
+          },
+          error: function () {
+            alert('Došlo je do pogreške prilikom učitavanja podataka');
+          }
+        });
+      }
+
+      function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
+      }
+
+      $('#filtriraj').click(fetchData);
+    });
+
+    function drawLineGraph(data) {
+      d3.select("#lineGraph").selectAll("*").remove();
+
+      const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+      const width = 1000 - margin.left - margin.right;
+      const height = 500 - margin.top - margin.bottom;
+
+      const svg = d3.select("#lineGraph")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleTime()
+        .domain(d3.extent(data, d => d.date))
+        .range([0, width]);
+
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.value)]).nice()
+        .range([height, 0]);
+
+      const line = d3.line()
+        .x(d => x(d.date))
+        .y(d => y(d.value));
+
+      svg.append("path")
+        .data([data])
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", line);
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    }
+    
+  </script>
+
+
+</body>
+
+</html>
